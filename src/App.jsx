@@ -1,59 +1,51 @@
 import { useState } from "react";
 import IcpGate from "./components/IcpGate";
+import TripRules from "./components/TripRules";
 
-function App() {
-  // ICP state (team vs personal)
+export default function App() {
   const [icp, setIcp] = useState(() => localStorage.getItem("icp") || "");
-
-  // demo state (will be removed later, kept for now)
-  const [count, setCount] = useState(0);
+  const [rules, setRules] = useState(null);
 
   const handleIcpSelect = (value) => {
     setIcp(value);
     localStorage.setItem("icp", value);
   };
 
-  // 🔒 ICP Gate always comes first
-  if (!icp) {
-    return <IcpGate onSelect={handleIcpSelect} />;
+  if (!icp) return <IcpGate onSelect={handleIcpSelect} />;
+
+  if (!rules) {
+    return (
+      <TripRules
+        icp={icp}
+        onContinue={(r) => {
+          setRules(r);
+          localStorage.setItem("trip_rules_v1", JSON.stringify(r));
+        }}
+      />
+    );
   }
 
+  // Next step placeholder (we’ll implement itinerary generation next)
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 px-6 py-10">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <header className="mb-10">
-          <p className="text-sm text-slate-400">Team Travel Planner</p>
-          <h1 className="text-3xl font-semibold mt-2">
-            Plan business trips with clarity
-          </h1>
-          <p className="text-slate-300 mt-3 max-w-2xl">
-            This product is optimized for company and team travel workflows —
-            budgets, constraints, and shareable itineraries.
-          </p>
-        </header>
+        <p className="text-sm text-slate-400">Step 2 of 3</p>
+        <h1 className="text-3xl font-semibold mt-2">Generate itinerary</h1>
+        <p className="text-slate-300 mt-3">
+          Trip rules saved. Next, we’ll generate an itinerary that respects these constraints.
+        </p>
 
-        {/* Temporary content (will evolve into Trip Rules) */}
-        <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-          <h2 className="text-lg font-medium mb-4">
-            Demo Area (next: Trip Rules)
-          </h2>
+        <pre className="mt-6 text-xs bg-slate-900 border border-slate-800 rounded-2xl p-4 overflow-auto">
+{JSON.stringify(rules, null, 2)}
+        </pre>
 
-          <button
-            onClick={() => setCount((c) => c + 1)}
-            className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition"
-          >
-            Clicked {count} times
-          </button>
-
-          <p className="text-slate-400 text-sm mt-4">
-            This section will be replaced with non-negotiable trip rules
-            (budget, team size, dates, constraints).
-          </p>
-        </section>
+        <button
+          onClick={() => setRules(null)}
+          className="mt-6 rounded-lg border border-slate-800 px-4 py-2 text-sm hover:bg-slate-900 transition"
+        >
+          Edit Trip Rules
+        </button>
       </div>
     </div>
   );
 }
-
-export default App;
