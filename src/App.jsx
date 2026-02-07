@@ -3,6 +3,7 @@ import IcpGate from "./components/IcpGate";
 import TripRules from "./components/TripRules";
 import RulesSummary from "./components/RulesSummary.jsx";
 import ItineraryGenerator from "./components/ItineraryGenerator";
+import ExportShare from "./components/ExportShare";
 
 export default function App() {
   const [icp, setIcp] = useState(() => localStorage.getItem("icp") || "");
@@ -10,7 +11,9 @@ export default function App() {
     const saved = localStorage.getItem("trip_rules_v1");
     return saved ? JSON.parse(saved) : null;
   });
-  const [showGen, setShowGen] = useState(false);
+
+  const [step, setStep] = useState("rules"); 
+  // rules → summary → itinerary → export
 
   const handleIcpSelect = (value) => {
     setIcp(value);
@@ -22,7 +25,7 @@ export default function App() {
     return <IcpGate onSelect={handleIcpSelect} />;
   }
 
-  // Step 2: Trip Rules (non-negotiables)
+  // Step 2: Trip Rules
   if (!rules) {
     return (
       <TripRules
@@ -30,29 +33,40 @@ export default function App() {
         onContinue={(r) => {
           setRules(r);
           localStorage.setItem("trip_rules_v1", JSON.stringify(r));
-          setShowGen(false); // reset generator state on new rules
+          setStep("summary");
         }}
       />
     );
   }
 
-  // Step 3: Rules Summary (confirmation before generation)
-  if (!showGen) {
+  // Step 3: Rules Summary
+  if (step === "summary") {
     return (
       <RulesSummary
         rules={rules}
         onEdit={() => setRules(null)}
-        onGenerate={() => setShowGen(true)}
+        onGenerate={() => setStep("itinerary")}
       />
     );
   }
 
-  // Step 4: Itinerary Generation (day-wise)
+  // Step 4: Itinerary Generator
+  if (step === "itinerary") {
+    return (
+      <ItineraryGenerator
+        icp={icp}
+        rules={rules}
+        onBack={() => setStep("summary")}
+        onNext={() => setStep("export")}
+      />
+    );
+  }
+
+  // Step 5: Export / Share
   return (
-    <ItineraryGenerator
-      icp={icp}
+    <ExportShare
       rules={rules}
-      onBack={() => setShowGen(false)}
+      onBack={() => setStep("itinerary")}
     />
   );
 }
