@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 
 function formatMoney(n) {
-  if (n === "" || n === null || n === undefined) return "";
+  // ✅ safe: handles "", null, undefined, NaN
+  if (n === "" || n === null || n === undefined) return "—";
   const num = Number(n);
-  if (Number.isNaN(num)) return String(n);
-  return num.toLocaleString("en-IN");
+  if (Number.isNaN(num)) return "—";
+  return `₹${num.toLocaleString("en-IN")}`;
 }
 
 function parseDate(d) {
@@ -67,7 +68,8 @@ Constraints:
 `.trim();
 }
 
-export default function ItineraryGenerator({ icp, rules, onBack }) {
+// ✅ UPDATED: added onNext so App can capture itineraryText for ExportShare
+export default function ItineraryGenerator({ icp, rules, onBack, onNext }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [data, setData] = useState(null);
@@ -90,8 +92,12 @@ export default function ItineraryGenerator({ icp, rules, onBack }) {
               "Hotel breakfast",
               `Meetings / work sessions (${rules.meetingStart}–${rules.meetingEnd})`,
               "Lunch near venue",
-              rules.nearVenue ? "Stay near venue / minimal commute" : "Commute + buffer time",
-              rules.wifiRequired ? "Ensure strong Wi-Fi at hotel/café" : "Wi-Fi optional",
+              rules.nearVenue
+                ? "Stay near venue / minimal commute"
+                : "Commute + buffer time",
+              rules.wifiRequired
+                ? "Ensure strong Wi-Fi at hotel/café"
+                : "Wi-Fi optional",
               "Local activity / team dinner",
             ]
           : [
@@ -109,6 +115,23 @@ export default function ItineraryGenerator({ icp, rules, onBack }) {
       city: rules.city,
       days,
     };
+  };
+
+  // ✅ Convert generated JSON itinerary -> plain text for ExportShare
+  const toItineraryText = (it) => {
+    if (!it || !Array.isArray(it.days)) return "";
+    const header = `${it.title || "Itinerary"}\nCity: ${it.city || rules.city}\nDates: ${
+      rules.startDate
+    } → ${rules.endDate}\n\n`;
+
+    const body = it.days
+      .map((d) => {
+        const items = (d.items || []).map((x) => `- ${x}`).join("\n");
+        return `Day ${d.day}: ${d.label}\n${items}`;
+      })
+      .join("\n\n");
+
+    return header + body;
   };
 
   const handleGenerate = async () => {
@@ -130,6 +153,19 @@ export default function ItineraryGenerator({ icp, rules, onBack }) {
     }
   };
 
+  const handleExportNext = () => {
+    const itineraryText = toItineraryText(data);
+
+    // if App didn't pass onNext, fallback to alert (won't crash)
+    if (typeof onNext === "function") onNext(itineraryText);
+    else alert("Next: Export / Share (wire onNext in App.jsx)");
+  };
+
+  // ✅ Budget text with safe fallback
+  const budgetText = `${formatMoney(rules?.budgetMin)} — ${formatMoney(
+  rules?.budgetMax
+)}`;
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 px-6 py-10">
       <div className="max-w-4xl mx-auto">
@@ -138,19 +174,22 @@ export default function ItineraryGenerator({ icp, rules, onBack }) {
         <p className="text-slate-300 mt-3">
           Generated for <span className="font-medium">{rules.city}</span> ·{" "}
           <span className="font-medium">{rules.teamSize}</span> people ·{" "}
-          <span className="font-medium">{icp === "team" ? "Team travel" : "Personal travel"}</span>
+          <span className="font-medium">
+            {icp === "team" ? "Team travel" : "Personal travel"}
+          </span>
         </p>
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-4">
             <p className="text-xs text-slate-400">Dates</p>
-            <p className="mt-1">{rules.startDate} → {rules.endDate}</p>
+            <p className="mt-1">
+              {rules.startDate} → {rules.endDate}
+            </p>
           </div>
+
           <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-4">
             <p className="text-xs text-slate-400">Budget</p>
-            <p className="mt-1">
-              ₹{formatMoney(rules.minBudget)} – ₹{formatMoney(rules.maxBudget)}
-            </p>
+            <p className="mt-1">{budgetText}</p>
           </div>
         </div>
 
@@ -171,9 +210,7 @@ export default function ItineraryGenerator({ icp, rules, onBack }) {
           </button>
         </div>
 
-        {error ? (
-          <p className="mt-4 text-sm text-red-400">{error}</p>
-        ) : null}
+        {error ? <p className="mt-4 text-sm text-red-400">{error}</p> : null}
 
         {data ? (
           <div className="mt-8 space-y-5">
@@ -198,10 +235,11 @@ export default function ItineraryGenerator({ icp, rules, onBack }) {
                 onClick={onBack}
                 className="rounded-lg border border-slate-800 px-4 py-2 text-sm hover:bg-slate-900 transition"
               >
-                Back to rules
+                Back to summary
               </button>
+
               <button
-                onClick={() => alert("Next: Export / Share (we’ll add this next)")}
+                onClick={handleExportNext}
                 className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium hover:bg-emerald-500 transition"
               >
                 Export / Share (next)
