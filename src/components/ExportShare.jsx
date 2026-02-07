@@ -1,8 +1,8 @@
-export default function ExportShare({ rules, itineraryText, onBack }) {
+export default function ExportShare({ rules, itineraryText = "", onBack }) {
   const shareText =
     `Team Travel Planner\n\n` +
     `Trip Rules:\n${JSON.stringify(rules, null, 2)}\n\n` +
-    `Itinerary:\n${itineraryText}`;
+    `Itinerary:\n${itineraryText || "(not generated yet)"}`;
 
   const copyToClipboard = async () => {
     try {

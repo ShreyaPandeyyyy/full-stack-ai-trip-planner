@@ -7,12 +7,24 @@ import ExportShare from "./components/ExportShare";
 
 export default function App() {
   const [icp, setIcp] = useState(() => localStorage.getItem("icp") || "");
+
   const [rules, setRules] = useState(() => {
     const saved = localStorage.getItem("trip_rules_v1");
     return saved ? JSON.parse(saved) : null;
   });
 
-  const [step, setStep] = useState("rules"); 
+  // ✅ NEW: store itinerary text
+  const [itineraryText, setItineraryText] = useState(() => {
+    return localStorage.getItem("itinerary_text_v1") || "";
+  });
+
+  // ✅ Better initial step:
+  // - if rules exist -> start at summary
+  // - else -> rules
+  const [step, setStep] = useState(() => {
+    const hasRules = !!localStorage.getItem("trip_rules_v1");
+    return hasRules ? "summary" : "rules";
+  });
   // rules → summary → itinerary → export
 
   const handleIcpSelect = (value) => {
@@ -33,6 +45,11 @@ export default function App() {
         onContinue={(r) => {
           setRules(r);
           localStorage.setItem("trip_rules_v1", JSON.stringify(r));
+
+          // reset itinerary when rules change
+          setItineraryText("");
+          localStorage.removeItem("itinerary_text_v1");
+
           setStep("summary");
         }}
       />
@@ -44,7 +61,15 @@ export default function App() {
     return (
       <RulesSummary
         rules={rules}
-        onEdit={() => setRules(null)}
+        onEdit={() => {
+          setRules(null);
+          localStorage.removeItem("trip_rules_v1");
+
+          setItineraryText("");
+          localStorage.removeItem("itinerary_text_v1");
+
+          setStep("rules");
+        }}
         onGenerate={() => setStep("itinerary")}
       />
     );
@@ -57,7 +82,13 @@ export default function App() {
         icp={icp}
         rules={rules}
         onBack={() => setStep("summary")}
-        onNext={() => setStep("export")}
+        // ✅ IMPORTANT: receive itinerary text here
+        onNext={(text) => {
+          const safeText = text || "";
+          setItineraryText(safeText);
+          localStorage.setItem("itinerary_text_v1", safeText);
+          setStep("export");
+        }}
       />
     );
   }
@@ -66,6 +97,7 @@ export default function App() {
   return (
     <ExportShare
       rules={rules}
+      itineraryText={itineraryText}
       onBack={() => setStep("itinerary")}
     />
   );
