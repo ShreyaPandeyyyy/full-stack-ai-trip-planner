@@ -39,6 +39,7 @@ https://full-stack-ai-trip-planner-gien.onrender.com
 ---
 
 ## 📁 Project Structure
+```
 full-stack-ai-trip-planner/
 │
 ├── index.html
@@ -57,6 +58,7 @@ full-stack-ai-trip-planner/
 └── server/
     ├── server.js
     └── package.json
+```
 
 ---
 
