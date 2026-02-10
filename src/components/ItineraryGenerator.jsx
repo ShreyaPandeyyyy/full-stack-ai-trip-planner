@@ -1,56 +1,4 @@
 // src/components/ItineraryGenerator.jsx
-<<<<<<< HEAD
-import { useState } from "react";
-
-export default function ItineraryGenerator() {
-  const [destination, setDestination] = useState("");
-  const [days, setDays] = useState(3);
-
-  return (
-    <div
-      style={{
-        padding: 16,
-        border: "1px solid #ddd",
-        borderRadius: 12,
-        marginTop: 16,
-      }}
-    >
-      <h2>Generate Your Trip Itinerary</h2>
-
-      <div style={{ marginBottom: 12 }}>
-        <label>Destination</label>
-        <br />
-        <input
-          value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-          placeholder="e.g. Goa"
-          style={{ padding: 8, width: "100%", marginTop: 4 }}
-        />
-      </div>
-
-      <div style={{ marginBottom: 12 }}>
-        <label>Number of days</label>
-        <br />
-        <input
-          type="number"
-          min={1}
-          value={days}
-          onChange={(e) => setDays(e.target.value)}
-          style={{ padding: 8, width: "100%", marginTop: 4 }}
-        />
-      </div>
-
-      <button
-        style={{
-          padding: "8px 16px",
-          borderRadius: 8,
-          border: "none",
-          cursor: "pointer",
-        }}
-      >
-        Generate Itinerary
-      </button>
-=======
 import { useMemo, useState } from "react";
 import ExportShare from "./ExportShare";
 
@@ -192,7 +140,6 @@ export default function ItineraryGenerator() {
     try {
       const prompt = buildPrompt(payload);
 
-      // Backend endpoint: POST /api/itinerary  (you can change if your server uses different)
       const res = await fetch(`${API}/api/itinerary`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -224,11 +171,12 @@ export default function ItineraryGenerator() {
             Generate a Smart Itinerary
           </h2>
           <p className="text-sm text-slate-600">
-            Enter your trip details — get a day-wise plan with cost split, food picks, and packing list.
+            Enter your trip details — get a day-wise plan with cost split, food picks,
+            and packing list.
           </p>
         </div>
 
-        {/* Travel type selector (advanced feel) */}
+        {/* Travel type selector */}
         <div className="mt-5 grid gap-3 md:grid-cols-2">
           <button
             onClick={() => setTravelType("Team / Company Travel")}
@@ -237,9 +185,14 @@ export default function ItineraryGenerator() {
                 ? "border-slate-900 bg-slate-900 text-white"
                 : "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
             }`}
+            type="button"
           >
             <div className="text-sm font-semibold">Team / Company Travel</div>
-            <div className={`mt-1 text-xs ${travelType === "Team / Company Travel" ? "text-slate-200" : "text-slate-500"}`}>
+            <div
+              className={`mt-1 text-xs ${
+                travelType === "Team / Company Travel" ? "text-slate-200" : "text-slate-500"
+              }`}
+            >
               Optimized for budgets, constraints, and shareable itineraries.
             </div>
           </button>
@@ -251,9 +204,14 @@ export default function ItineraryGenerator() {
                 ? "border-slate-900 bg-slate-900 text-white"
                 : "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
             }`}
+            type="button"
           >
             <div className="text-sm font-semibold">Personal Travel</div>
-            <div className={`mt-1 text-xs ${travelType === "Personal Travel" ? "text-slate-200" : "text-slate-500"}`}>
+            <div
+              className={`mt-1 text-xs ${
+                travelType === "Personal Travel" ? "text-slate-200" : "text-slate-500"
+              }`}
+            >
               Flexible plan, leisure-friendly pacing, local experiences.
             </div>
           </button>
@@ -325,7 +283,8 @@ export default function ItineraryGenerator() {
               className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
             />
             <div className="mt-1 text-xs text-slate-500">
-              Days auto-calculated: <span className="font-semibold text-slate-700">{days}</span>
+              Days auto-calculated:{" "}
+              <span className="font-semibold text-slate-700">{days}</span>
             </div>
           </div>
 
@@ -385,6 +344,7 @@ export default function ItineraryGenerator() {
                   ? "cursor-not-allowed bg-slate-200 text-slate-500"
                   : "bg-slate-900 text-white hover:bg-slate-800"
               }`}
+              type="button"
             >
               {loading ? "Generating..." : "Generate Itinerary"}
             </button>
@@ -403,9 +363,7 @@ export default function ItineraryGenerator() {
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-1">
             <h3 className="text-lg font-semibold text-slate-900">Your Itinerary</h3>
-            <p className="text-sm text-slate-600">
-              You can copy or download this plan.
-            </p>
+            <p className="text-sm text-slate-600">You can copy or download this plan.</p>
           </div>
 
           <pre className="mt-4 max-h-[520px] overflow-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-800">
@@ -419,7 +377,6 @@ export default function ItineraryGenerator() {
       <div className="mt-6 text-xs text-slate-500">
         API base: <span className="font-mono">{API}</span>
       </div>
->>>>>>> b2b-icp-redesign
     </div>
   );
 }
