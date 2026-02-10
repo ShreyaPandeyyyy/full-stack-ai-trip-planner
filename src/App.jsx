@@ -1,16 +1,6 @@
-<<<<<<< HEAD
 // src/App.jsx
 import { useEffect, useState } from "react";
-import ItineraryGenerator from "./components/ItineraryGenerator";
 
-export default function App() {
-  const [apiBase, setApiBase] = useState("");
-
-  useEffect(() => {
-    setApiBase(import.meta.env.VITE_API_BASE || "");
-  }, []);
-=======
-import { useState } from "react";
 import IcpGate from "./components/IcpGate";
 import TripRules from "./components/TripRules";
 import RulesSummary from "./components/RulesSummary.jsx";
@@ -18,27 +8,29 @@ import ItineraryGenerator from "./components/ItineraryGenerator";
 import ExportShare from "./components/ExportShare";
 
 export default function App() {
+  const [apiBase, setApiBase] = useState("");
+
+  useEffect(() => {
+    setApiBase(import.meta.env.VITE_API_BASE || "");
+  }, []);
+
   const [icp, setIcp] = useState(() => localStorage.getItem("icp") || "");
->>>>>>> b2b-icp-redesign
 
   const [rules, setRules] = useState(() => {
     const saved = localStorage.getItem("trip_rules_v1");
     return saved ? JSON.parse(saved) : null;
   });
 
-  // ✅ NEW: store itinerary text
+  // store itinerary text
   const [itineraryText, setItineraryText] = useState(() => {
     return localStorage.getItem("itinerary_text_v1") || "";
   });
 
-  // ✅ Better initial step:
-  // - if rules exist -> start at summary
-  // - else -> rules
+  // rules → summary → itinerary → export
   const [step, setStep] = useState(() => {
     const hasRules = !!localStorage.getItem("trip_rules_v1");
     return hasRules ? "summary" : "rules";
   });
-  // rules → summary → itinerary → export
 
   const handleIcpSelect = (value) => {
     setIcp(value);
@@ -95,7 +87,6 @@ export default function App() {
         icp={icp}
         rules={rules}
         onBack={() => setStep("summary")}
-        // ✅ IMPORTANT: receive itinerary text here
         onNext={(text) => {
           const safeText = text || "";
           setItineraryText(safeText);
@@ -108,50 +99,41 @@ export default function App() {
 
   // Step 5: Export / Share
   return (
-<<<<<<< HEAD
-    <div
-      style={{
-        fontFamily: "system-ui",
-        padding: 24,
-        maxWidth: 900,
-        margin: "0 auto",
-        lineHeight: 1.5,
-      }}
-    >
-      <header style={{ marginBottom: 16 }}>
-        <h1 style={{ margin: 0 }}>Full-Stack AI Trip Planner</h1>
-        <p style={{ marginTop: 6, opacity: 0.85 }}>
-          Deployed on Vercel ✅{" "}
-          {apiBase ? (
-            <span style={{ fontSize: 12 }}>(API: {apiBase})</span>
-          ) : (
-            <span style={{ fontSize: 12 }}>
-              (Set VITE_API_BASE in .env / Vercel)
-            </span>
-          )}
-        </p>
-      </header>
+    <>
+      <div
+        style={{
+          fontFamily: "system-ui",
+          padding: 24,
+          maxWidth: 900,
+          margin: "0 auto",
+          lineHeight: 1.5,
+        }}
+      >
+        <header style={{ marginBottom: 16 }}>
+          <h1 style={{ margin: 0 }}>Full-Stack AI Trip Planner</h1>
+          <p style={{ marginTop: 6, opacity: 0.85 }}>
+            Deployed on Vercel ✅{" "}
+            {apiBase ? (
+              <span style={{ fontSize: 12 }}>(API: {apiBase})</span>
+            ) : (
+              <span style={{ fontSize: 12 }}>
+                (Set VITE_API_BASE in .env / Vercel)
+              </span>
+            )}
+          </p>
+        </header>
 
-      <main style={{ marginTop: 24 }}>
-        {/* SAFETY CHECK */}
-        {ItineraryGenerator ? (
-          <ItineraryGenerator />
-        ) : (
-          <p>ItineraryGenerator component not found.</p>
-        )}
-      </main>
+        <ExportShare
+          rules={rules}
+          itineraryText={itineraryText}
+          onBack={() => setStep("itinerary")}
+        />
 
-      <footer style={{ marginTop: 32, fontSize: 12, opacity: 0.7 }}>
-        Tip: In local dev, create a <code>.env</code> with{" "}
-        <code>VITE_API_BASE=http://localhost:5000</code>
-      </footer>
-    </div>
-=======
-    <ExportShare
-      rules={rules}
-      itineraryText={itineraryText}
-      onBack={() => setStep("itinerary")}
-    />
->>>>>>> b2b-icp-redesign
+        <footer style={{ marginTop: 32, fontSize: 12, opacity: 0.7 }}>
+          Tip: In local dev, create a <code>.env</code> with{" "}
+          <code>VITE_API_BASE=http://localhost:5000</code>
+        </footer>
+      </div>
+    </>
   );
 }
